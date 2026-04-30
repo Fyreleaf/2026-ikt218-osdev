@@ -6,10 +6,17 @@ typedef unsigned int size_t;
 #include "idt.h"
 #include "isr.h"
 #include "irq.h"
+#include "memory.h"
+#include "paging.h"
+#include "pit.h"
+
+
+extern uint32_t end;
 
 #define VGA_WIDTH 80
 #define VGA_HEIGHT 25
 #define VGA_MEMORY ((uint16_t*)0xB8000)
+
 
 static size_t terminal_row = 0;
 static size_t terminal_column = 0;
@@ -62,17 +69,77 @@ void terminal_write(const char* str) {
         terminal_putchar(str[i]);
     }
 }
+void print_int(int number) {
+    char buffer[16];
+    int i = 0;
+
+    if (number == 0) {
+        terminal_putchar('0');
+        return;
+    }
+
+    if (number < 0) {
+        terminal_putchar('-');
+        number = -number;
+    }
+
+    while (number > 0) {
+        buffer[i++] = '0' + (number % 10);
+        number /= 10;
+    }
+
+    while (i > 0) {
+        terminal_putchar(buffer[--i]);
+    }
+}
+
+void printf(const char* format, int value) {
+    for (size_t i = 0; format[i] != '\0'; i++) {
+        if (format[i] == '%' && format[i + 1] == 'd') {
+            print_int(value);
+            i++;
+        } else {
+            terminal_putchar(format[i]);
+        }
+    }
+}
+
+void test_new(void);
 
 void main(void) {
+    terminal_clear();
     gdt_init();
     idt_init();
     isr_install();
     irq_install();
 
-    terminal_clear();
+    
+
+    init_kernel_memory(&end);
+    init_paging();
+    print_memory_layout();  
+    init_pit();
+
+    // malloc tests
+    void* a = malloc(12345);
+    void* b = malloc(54321);
+    void* c = malloc(13331);
+    if (a && b && c) {
+    terminal_write("malloc works\n");
+    }
+    test_new();
     terminal_write("Write what you want here:\n");
 
+
+    // pit tests
+    int counter = 0;
     while (1) {
-        asm volatile("hlt");
+        printf("[%d]: Sleeping with busy-waiting (HIGH CPU).\n", counter);
+        sleep_busy(1000);
+        printf("[%d]: Slept using busy-waiting.\n", counter++);
+
+        printf("[%d]: Sleeping with interrupts (LOW CPU).\n", counter);
+        sleep_interrupt(1000);
+        printf("[%d]: Slept using interrupts.\n", counter++);
     }
 }

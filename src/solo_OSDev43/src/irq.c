@@ -1,8 +1,10 @@
 #include "irq.h"
+
 extern char keymap[128];
 void terminal_write(const char* str);
 void terminal_putchar(char c);
 void idt_set_gate(unsigned char num, unsigned int base, unsigned short selector, unsigned char flags);
+void pit_tick(void);
 
 extern void irq0(void);
 extern void irq1(void);
@@ -33,12 +35,12 @@ static inline unsigned char inb(unsigned short port) {
 
 void irq_handler(unsigned int irq_number) {
     if (irq_number == 0) {
-        // Timer interrupt.
-        // Do nothing to avoid screen spam.
+        pit_tick();
+        
     } else if (irq_number == 1) {
         unsigned char scancode = inb(0x60);
 
-        // Ignore key release
+        // Ignores key releases
         if (!(scancode & 0x80)) {
             char c = keymap[scancode];
 
