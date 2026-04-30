@@ -21,7 +21,7 @@ void init_kernel_memory(uint32_t* kernel_end) {
 
     memset_local((void*)heap_begin, 0, heap_end - heap_begin);
 
-    terminal_write("Kernel memory initialized\n");
+    //terminal_write("Kernel memory initialized\n");
 }
 
 void* malloc(size_t size) {
@@ -88,5 +88,5 @@ void free(void* ptr) {
 }
 
 void print_memory_layout(void) {
-    terminal_write("Heap starts after kernel end\n");
+   // terminal_write("Heap starts after kernel end\n");
 }

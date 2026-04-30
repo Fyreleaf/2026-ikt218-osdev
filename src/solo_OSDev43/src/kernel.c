@@ -105,6 +105,43 @@ void printf(const char* format, int value) {
     }
 }
 
+void terminal_write_at(const char* str, size_t row, size_t column) {
+    size_t x = column;
+
+    while (*str) {
+        VGA_MEMORY[row * VGA_WIDTH + x] = vga_entry(*str, terminal_color);
+        str++;
+        x++;
+    }
+}
+
+void clear_line(size_t row) {
+    for (size_t x = 0; x < VGA_WIDTH; x++) {
+        VGA_MEMORY[row * VGA_WIDTH + x] = vga_entry(' ', terminal_color);
+    }
+}
+
+void piano_status(const char* note) {
+    clear_line(12);
+    terminal_write_at("Now playing: ", 12, 0);
+    terminal_write_at(note, 12, 13);
+}
+
+void draw_piano_ui(void) {
+    
+    terminal_write("=======Mini Piano=======\n");
+   
+    terminal_write("Press keys 1-8 to play notes\n");
+    terminal_write("Press SPACE to stop the current note\n\n");
+
+    terminal_write("   1    2    3    4    5    6    7    8\n");
+    terminal_write("+----+----+----+----+----+----+----+----+\n");
+    terminal_write("| C4 | D4 | E4 | F4 | G4 | A4 | B4 | C5 |\n");
+    terminal_write("+----+----+----+----+----+----+----+----+\n\n");
+
+    
+}
+
 void test_new(void);
 
 void main(void) {
@@ -120,27 +157,9 @@ void main(void) {
     print_memory_layout();
     init_pit();
 
-    void* a = malloc(12345);
-    void* b = malloc(54321);
-    void* c = malloc(13331);
-
-    if (a && b && c) {
-        terminal_write("malloc works\n");
-    }
-
-    free(b);
-
-    void* d = malloc(1000);
-
-    if (d == b) {
-        terminal_write("free works\n");
-    }
-
-    test_new();
-
-    terminal_write("Starting music player...\n");
-
-    play_music();
+    // terminal_write("Starting piano mode, press a number between 1-8 to play and press space to stop the note.\n"); // Old message, replaced by draw_piano_ui
+    draw_piano_ui();
+    // play_music(); // Uncomment to play music automatically
 
     while (1) {
         asm volatile("hlt");

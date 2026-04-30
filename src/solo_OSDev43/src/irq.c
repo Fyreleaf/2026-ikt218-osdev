@@ -33,6 +33,10 @@ static inline unsigned char inb(unsigned short port) {
     return ret;
 }
 
+void play_sound(unsigned int frequency);
+void stop_sound(void);
+void piano_status(const char* note);
+
 void irq_handler(unsigned int irq_number) {
     if (irq_number == 0) {
         pit_tick();
@@ -44,8 +48,34 @@ void irq_handler(unsigned int irq_number) {
         if (!(scancode & 0x80)) {
             char c = keymap[scancode];
 
-            if (c) {
-                terminal_putchar(c);
+            
+            if (c == '1') {
+                play_sound(262);
+                piano_status("C4");
+            } else if (c == '2') {
+                play_sound(294);
+                piano_status("D4");
+            } else if (c == '3') {
+                play_sound(330);
+                piano_status("E4");
+            } else if (c == '4') {
+                play_sound(349);
+                piano_status("F4");
+            } else if (c == '5') {
+                play_sound(392);
+                piano_status("G4");
+            } else if (c == '6') {
+                play_sound(440);
+                piano_status("A4");
+            } else if (c == '7') {
+                play_sound(494);
+                piano_status("B4");
+            } else if (c == '8') {
+                play_sound(523);
+                piano_status("C5");
+            } else if (c == ' ') {
+                stop_sound();
+                piano_status("Stopped");
             }
         }
     }

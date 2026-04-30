@@ -21,5 +21,5 @@ void init_paging(void) {
     load_page_directory(page_directory);
     enable_paging();
 
-    terminal_write("Paging enabled\n");
+    //terminal_write("Paging enabled\n"); // commented out to reduce clutter in terminal output
 }
